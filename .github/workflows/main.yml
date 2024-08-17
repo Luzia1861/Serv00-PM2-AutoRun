@@ -1,10 +1,9 @@
 name: autorun
 
 on:
-  workflow_dispatch:
   schedule:
-    # 每5分钟运行一次
-    - cron: '0/5 * * * *'
+    # 每天凌晨2点30分运行一次
+    - cron: '30 2 * * *'
 
 jobs:
   ssh-and-run:
@@ -18,15 +17,6 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Check if service is running
-      id: check_service
-      run: |
-        if curl --head --silent --fail https://liyizi2.serv00.net > /dev/null; then
-          echo "service_status=running" >> $GITHUB_ENV
-        else
-          echo "service_status=not_running" >> $GITHUB_ENV
-        fi
-
-    - name: Run script on remote server if service is not running
-      if: env.service_status == 'not_running'
-      run: ssh -o StrictHostKeyChecking=no dino@s4.serv00.com "screen -S vless -dm bash -c 'node /home/liyizi2/domains/liyizi2.serv00.net/vless/app.js'"
+    - name: Run script on remote server
+      run: ssh -o StrictHostKeyChecking=no dino@s4.serv00.com "screen -S vless node /home/liyizi2/domains/liyizi2.serv00.net/vless/app.js'"
+#screen -S vless -dm bash -c 'node /home/liyizi2/domains/liyizi2.serv00.net/vless/app.js
